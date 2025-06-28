@@ -1,0 +1,4 @@
+paypal:
+  client-id: your-paypal-client-id
+  secret: your-paypal-secret
+  mode: live
