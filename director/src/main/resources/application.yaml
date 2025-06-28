@@ -1,0 +1,12 @@
+spring:
+  config:
+    import:
+      - classpath:config/db-config.yaml
+      - classpath:config/google-oauth.yaml
+      - classpath:config/paypal-keys.yaml
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: false
