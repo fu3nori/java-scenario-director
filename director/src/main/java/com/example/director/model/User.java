@@ -5,6 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "users") // ← テーブル名を明示的に指定！
 @Data
 public class User {
     @Id
