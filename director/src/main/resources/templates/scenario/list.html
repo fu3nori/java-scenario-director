@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>シナリオ一覧</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .rounded-button {
+            border-radius: 20px;
+            padding: 6px 16px;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/header2 :: header"></div>
+
+<div class="container mt-4 text-center">
+    <img src="/img/logo.png" alt="ロゴ" class="mb-3">
+    <h2 class="mb-4">シナリオ一覧</h2>
+
+    <!-- 見出し -->
+    <div class="mb-2">
+        <span class="rounded-button btn btn-secondary">タイトル</span>
+        <span class="rounded-button btn btn-secondary">更新日時</span>
+    </div>
+
+    <!-- 一覧 -->
+    <div class="mb-4">
+        <div th:each="scenario : ${scenarios.content}">
+            <a th:href="@{/scenario/edit/{id}(id=${scenario.id})}" class="rounded-button btn btn-outline-primary"
+               th:text="${scenario.title}">タイトル</a>
+            <a th:href="@{/scenario/edit/{id}(id=${scenario.id})}" class="rounded-button btn btn-outline-dark"
+               th:text="${#temporals.format(scenario.updatedAt, 'yyyy/MM/dd HH:mm')}">更新日</a>
+        </div>
+    </div>
+
+    <!-- ページング -->
+    <div>
+        <a th:if="${hasPrevious}" th:href="@{/scenario/list(page=${currentPage - 1})}"
+           class="rounded-button btn btn-outline-secondary">前へ</a>
+        <a th:if="${hasNext}" th:href="@{/scenario/list(page=${currentPage + 1})}"
+           class="rounded-button btn btn-outline-secondary">後ろへ</a>
+    </div>
+</div>
+</body>
+</html>

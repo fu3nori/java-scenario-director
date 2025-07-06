@@ -29,6 +29,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 
 
@@ -225,6 +229,27 @@ public class ScenarioController {
         } catch (DocumentException e) {
             throw new IOException("PDF出力に失敗しました", e);
         }
+    }
+
+    // シナリオ一覧
+    @GetMapping("/scenario/list")
+    public String listScenarios(HttpSession session, Model model,
+                                @RequestParam(defaultValue = "0") int page) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ログインが必要です");
+        }
+
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<Scenario> scenarios = scenarioRepository.findByUserId(user.getId(), pageable);
+
+        model.addAttribute("scenarios", scenarios);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("hasNext", scenarios.hasNext());
+        model.addAttribute("hasPrevious", scenarios.hasPrevious());
+
+        return "scenario/list";
     }
 
 
