@@ -29,14 +29,23 @@
     </div>
 
     <!-- 一覧 -->
-    <div class="mb-4">
-        <div th:each="scenario : ${scenarios.content}">
-            <a th:href="@{/scenario/edit/{id}(id=${scenario.id})}" class="rounded-button btn btn-outline-primary"
-               th:text="${scenario.title}">タイトル</a>
-            <a th:href="@{/scenario/edit/{id}(id=${scenario.id})}" class="rounded-button btn btn-outline-dark"
-               th:text="${#temporals.format(scenario.updatedAt, 'yyyy/MM/dd HH:mm')}">更新日</a>
+    <div th:each="scenario : ${scenarios}" class="d-flex justify-content-between align-items-center border rounded px-3 py-2 mb-2">
+        <div>
+            <a th:href="@{/scenario/edit/{id}(id=${scenario.id})}" class="btn btn-outline-dark me-3">
+                <span th:text="${scenario.title}">タイトル</span>
+            </a>
+            <a th:href="@{/scenario/edit/{id}(id=${scenario.id})}" class="btn btn-outline-secondary">
+                <span th:text="${#temporals.format(scenario.updatedAt, 'yyyy-MM-dd HH:mm')}">更新日時</span>
+            </a>
         </div>
+
+        <form th:action="@{/scenario/delete/{id}(id=${scenario.id})}" method="post"
+              onsubmit="return confirm('このシナリオを本当に削除しますか？');">
+            <button class="btn btn-sm btn-danger">削除</button>
+        </form>
     </div>
+
+
 
     <!-- ページング -->
     <div>

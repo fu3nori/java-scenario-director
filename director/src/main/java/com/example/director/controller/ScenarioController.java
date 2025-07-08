@@ -252,6 +252,24 @@ public class ScenarioController {
         return "scenario/list";
     }
 
+    // シナリオ削除
+    @PostMapping("/scenario/delete/{id}")
+    public String deleteScenario(@PathVariable Long id, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ログインが必要です");
+        }
+
+        Scenario scenario = scenarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "シナリオが見つかりません"));
+
+        if (!scenario.getUserId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "このシナリオを削除する権限がありません");
+        }
+
+        scenarioRepository.delete(scenario);
+        return "redirect:/scenario/list";
+    }
 
 
 
