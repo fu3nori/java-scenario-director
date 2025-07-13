@@ -1,61 +1,171 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>プロット編集・閲覧</title>
-  <!-- Bootstrap CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+  <!-- CSRF保護 -->
+  <!-- CSRF用metaタグ -->
+  <meta th:if="${_csrf != null}" name="_csrf"        th:content="${_csrf.token}"       />
+  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+
 </head>
 <body>
-<!-- 共通ヘッダー -->
-<div th:replace=fragments/header2 :: header2></div>
+<!-- ヘッダー -->
+<div th:replace="fragments/header2 :: header2"></div>
 
 <div class="container mt-4">
-  <!-- ロゴ -->
+  <!-- ロゴ＆見出し -->
   <div class="text-center mb-3">
-    <img th:src="@{/img/logo.png}" alt="ロゴ" height="60">
+    <img th:src="@{/img/logo.png}" alt="ロゴ" height="60" />
   </div>
-
-  <!-- 見出し -->
   <h2 class="text-center mb-3">プロット編集・閲覧</h2>
-
-  <!-- 説明文 -->
-  <p>シナリオの部品（プロット）を編集します。フィールドにタイトルやプロットを記入すると自動的に保存されますが、保存ボタンで明示的に保存も可能です。</p>
-  <p>新たなプロットを追加したい場合はフィールド横の追加ボタンをクリックしてください。削除したい場合は削除ボタンをクリックしてください。ドラッグ＆ドロップで並び替えも可能です。</p>
-
-  <!-- 保存ボタン（上） -->
-  <div class="text-end mb-3">
-    <button class="btn btn-primary rounded-pill" id="saveBtnTop">保存</button>
-  </div>
 
   <!-- プロットタイトル -->
   <div class="mb-4">
     <label for="plotTitle" class="form-label fw-bold">プロットタイトル</label>
-    <input type="text" class="form-control" id="plotTitle" th:value="${plot.title}" data-plot-id="${plot.id}">
+    <input id="plotTitle"
+           type="text"
+           th:value="${plot.title}"
+           class="form-control mb-3" />
   </div>
 
-  <!-- プロット編集 -->
+  <!-- プロット行一覧 -->
   <div>
     <label class="form-label fw-bold">プロット編集</label>
-    <div id="plotContainer">
-      <!-- ループでプロット入力欄を出力 -->
-      <div th:each="order, iterStat : ${plotOrders}" class="d-flex align-items-start mb-2 plot-item" th:data-order-id="${order.id}" th:data-order-index="${iterStat.index}">
-        <textarea class="form-control me-2 plot-content" style="width: 70%; height: 4em;" th:text="${order.content}"></textarea>
-        <button class="btn btn-success rounded-pill me-1 add-btn">追加</button>
-        <button class="btn btn-danger rounded-pill delete-btn">削除</button>
+    <div id="plotList">
+      <div th:each="order, iterStat : ${plotOrders}"
+           class="plot-item mb-3"
+           th:attr="data-id=${order.id},data-order=${iterStat.index}">
+          <textarea class="form-control plot-content"
+                    rows="2"
+                    th:text="${order.content}"></textarea>
+        <button type="button" class="btn btn-primary add-btn">追加</button>
+        <button type="button" class="btn btn-danger delete-btn">削除</button>
       </div>
     </div>
   </div>
 
-  <!-- 保存ボタン（下） -->
+  <!-- 保存ボタン -->
+  <div class="text-end mb-3">
+    <button type="button" class="btn btn-primary rounded-pill" id="saveBtnTop">保存</button>
+  </div>
   <div class="text-end mt-4">
-    <button class="btn btn-primary rounded-pill" id="saveBtnBottom">保存</button>
+    <button type="button" class="btn btn-primary rounded-pill" id="saveBtnBottom">保存</button>
   </div>
 </div>
 
-<!-- 今後のJS追加用 -->
-<script>
-  // リアルタイム保存処理、追加・削除、並び替え処理はここに書く予定
+<!-- JSライブラリ -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+
+<!-- インラインJS -->
+<script th:inline="javascript">
+  // ==== 共通設定 ====
+  const plotId     = [[${plot.id}]];                            // プロットID（数値）
+  const csrfToken  = $('meta[name="_csrf"]').attr('content');   // CSRF トークン
+  const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+  // すべての Ajax 送信に CSRF ヘッダーを自動セット
+  $(document).ajaxSend((e, xhr) => {
+    if (csrfHeader && csrfToken) {
+      xhr.setRequestHeader(csrfHeader, csrfToken);
+    }
+  });
+
+  // ==== タイトルのリアルタイム保存（PATCH JSON） ====
+  $('#plotTitle').on('input', () => {
+    $.ajax({
+      url: `/api/plots/${plotId}`,
+      method: 'PATCH',
+      contentType: 'application/json',
+      data: JSON.stringify({ title: $('#plotTitle').val() }),
+      success: () => console.log('タイトル保存 OK'),
+      error:   xhr => console.error('タイトル保存 NG:', xhr.responseText)
+    });
+  });
+
+  // ==== 行のドラッグ＆ドロップ有効化 ====
+  new Sortable($('#plotList')[0], {
+    animation: 150,
+    onEnd:     syncAll
+  });
+
+  // ==== 行テキスト変更でリアルタイム保存（PATCH JSON） ====
+  $(document).on('input', '.plot-content', function() {
+    const item    = $(this).closest('.plot-item');
+    const id      = item.data('id');
+    const content = $(this).val();
+    const order   = item.index();
+    savePlotOrder(id, content, order);
+  });
+
+  function savePlotOrder(id, content, order) {
+    $.ajax({
+      url: `/api/plot_orders/${id}`,
+      method: 'PATCH',
+      contentType: 'application/json',
+      data: JSON.stringify({ content: content, plotOrder: order }),
+      success: () => console.log(`#${id} 更新 OK (order=${order})`),
+      error:   xhr => console.error(`#${id} 更新 NG:`, xhr.responseText)
+    });
+  }
+
+  // ==== 行追加ボタン（POST フォーム送信） ====
+  $(document).on('click', '.add-btn', function() {
+    const cur   = $(this).closest('.plot-item');
+    const index = cur.index() + 1;
+
+    // @RequestParam なので form-data（URL エンコード）で送信
+    $.post('/api/plot_orders',
+            { plotId: plotId, plotOrder: index },
+            function(newItem) {
+              // 受け取った JSON を元に行を組み立て
+              const html = ''
+                      + `<div class="plot-item mb-3" data-id="${newItem.id}">`
+                      +   `<textarea class="form-control plot-content" rows="2" style="width:70%;">${newItem.content}</textarea>`
+                      +   `<button type="button" class="btn btn-primary add-btn">追加</button>`
+                      +   `<button type="button" class="btn btn-danger delete-btn">削除</button>`
+                      + `</div>`;
+              cur.after(html);
+              syncAll();
+            },
+            'json'
+    ).fail(xhr => console.error('追加失敗:', xhr.responseText));
+  });
+
+  // ==== 行削除ボタン（DELETE） ====
+  $(document).on('click', '.delete-btn', function() {
+    const item = $(this).closest('.plot-item');
+    const id   = item.data('id');
+
+    $.ajax({
+      url:    `/api/plot_orders/${id}`,
+      method: 'DELETE',
+      success: () => {
+        item.remove();
+        syncAll();
+      },
+      error: xhr => console.error('削除失敗:', xhr.responseText)
+    });
+  });
+
+  // ==== 明示保存ボタン ====
+  $('#saveBtnTop, #saveBtnBottom').click(syncAll);
+
+  // ==== 全行を一括保存（PATCH JSON） ====
+  function syncAll() {
+    $('#plotList .plot-item').each(function(i) {
+      const id      = $(this).data('id');
+      const content = $(this).find('textarea').val();
+      savePlotOrder(id, content, i);
+    });
+  }
 </script>
+
+
 </body>
 </html>

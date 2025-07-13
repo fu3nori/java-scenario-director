@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import com.example.director.model.PlotOrder;
 import com.example.director.repository.PlotOrderRepository;
 import java.util.List;
+import org.springframework.security.web.csrf.CsrfToken;
 
 @Controller
 @RequestMapping("/plot")
@@ -55,7 +56,7 @@ public class PlotController {
 
     // プロット編集
     @GetMapping("/edit/{id}")
-    public String editPlot(@PathVariable("id") Long id, Model model, HttpSession session) {
+    public String editPlot(@PathVariable("id") Long id, Model model, HttpSession session, CsrfToken csrfToken ) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ログインが必要です");
@@ -85,7 +86,7 @@ public class PlotController {
         // Viewに渡すデータ
         model.addAttribute("plot", plot);             // プロットタイトルなど
         model.addAttribute("plotOrders", orders);     // 各行のデータ
-
+        model.addAttribute("_csrf", csrfToken);
         return "plot/edit"; // Thymeleafテンプレート：resources/templates/plot/edit.html
     }
 

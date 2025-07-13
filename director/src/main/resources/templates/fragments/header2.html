@@ -1,12 +1,15 @@
-<div th:fragment="header">
+<!-- templates/fragments/header2.html -->
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="header2">
     <div class="container-fluid py-2" style="background-color: #b7ffff;">
         <div class="d-flex justify-content-start gap-3">
             <a th:href="@{/scenario/create}" class="btn btn-outline-primary rounded-pill text-black bg-white">シナリオ作成</a>
-            <a th:href="@{/scenario/list}" class="btn btn-outline-success rounded-pill text-black bg-white">シナリオ一覧</a>
-            <a th:href="@{/plot/create}" class="btn btn-primary rounded-pill text-white">プロット作成</a>
-            <a th:href="@{/plot/list}" class="btn btn-outline-danger rounded-pill text-black bg-white">プロット一覧</a>
-            <a th:href="@{/account/edit}" class="btn btn-dark rounded-pill text-white">アカウント編集</a>
-            <a th:href="@{/logout}" class="btn btn-outline-dark rounded-pill text-black bg-white">ログアウト</a>
+            <a th:href="@{/scenario/list}"   class="btn btn-outline-success rounded-pill text-black bg-white">シナリオ一覧</a>
+            <a th:href="@{/plot/create}"     class="btn btn-primary rounded-pill text-white">プロット作成</a>
+            <a th:href="@{/plot/list}"       class="btn btn-outline-danger rounded-pill text-black bg-white">プロット一覧</a>
+            <a th:href="@{/account/edit}"    class="btn btn-dark rounded-pill text-white">アカウント編集</a>
+            <a th:href="@{/logout}"          class="btn btn-outline-dark rounded-pill text-black bg-white">ログアウト</a>
         </div>
     </div>
 </div>
+
+
