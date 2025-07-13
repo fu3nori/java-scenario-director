@@ -66,6 +66,9 @@ dependencies {
     implementation 'org.xhtmlrenderer:flying-saucer-pdf:9.1.22'
     implementation 'org.jsoup:jsoup:1.17.2'
 
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
 }
 
