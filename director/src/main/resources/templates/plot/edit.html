@@ -11,6 +11,29 @@
   <meta th:if="${_csrf != null}" name="_csrf"        th:content="${_csrf.token}"       />
   <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
 
+  <style>
+    :root {
+      --save-btn-left: 12px; /* 左からの距離 */
+    }
+
+
+
+    /* 上の保存ボタンをラベルの上に置くが、被らないよう間隔調整 */
+    #saveBtnTopLeft {
+      position: absolute;
+      top: 30px;
+      left: var(--save-btn-left);
+      transform: translateY(-100%); /* ボタンの高さ分＋間隔分を上に */
+    }
+
+    .relative-container {
+      position: relative;
+      padding-top: 2.5rem; /* ボタンが重ならないように余白追加 */
+    }
+  </style>
+
+
+
 </head>
 <body>
 <!-- ヘッダー -->
@@ -36,13 +59,23 @@
 
 
   <!-- プロットタイトル -->
-  <div class="mb-4">
+  <!-- 保存ボタン（左上） -->
+  <!-- プロットタイトル -->
+  <div class="relative-container mb-4">
+    <!-- 保存ボタン（左上） -->
+    <button type="button"
+            class="btn btn-primary rounded-pill"
+            id="saveBtnTopLeft">保存</button>
+
+    <!-- プロットタイトル -->
     <label for="plotTitle" class="form-label fw-bold">プロットタイトル</label>
     <input id="plotTitle"
            type="text"
            th:value="${plot.title}"
            class="form-control mb-3" />
   </div>
+
+
 
   <!-- プロット行一覧 -->
   <div>
@@ -59,16 +92,19 @@
 
       </div>
     </div>
+
+    <!-- 👇 明示的に「一番下」に表示される保存ボタン -->
+    <div class="mt-4 text-start">
+      <button type="button"
+              class="btn btn-primary rounded-pill"
+              id="saveBtnBottomFixed">保存</button>
+      <br><br>
+    </div>
+
   </div>
 
-  <!-- 保存ボタン -->
-  <div class="text-end mb-3">
-    <button type="button" class="btn btn-primary rounded-pill" id="saveBtnTop">保存</button>
-  </div>
-  <div class="text-end mt-4">
-    <button type="button" class="btn btn-primary rounded-pill" id="saveBtnBottom">保存</button>
-  </div>
-</div>
+
+
 
 <!-- JSライブラリ -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -176,7 +212,8 @@
 
 
   // ==== 明示保存ボタン ====
-  $('#saveBtnTop, #saveBtnBottom').click(syncAll);
+  $('#saveBtnTopLeft, #saveBtnBottomFixed').click(syncAll);
+
 
   // ==== 全行を一括保存（PATCH JSON） ====
   function syncAll() {
