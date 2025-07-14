@@ -153,10 +153,18 @@
   // ==== 行削除ボタン（DELETE） ====
   $(document).on('click', '.delete-btn', function() {
     const item = $(this).closest('.plot-item');
-    const id   = item.data('id');
+
+    // プロットが1つしかない場合は削除禁止
+    const totalItems = $('#plotList .plot-item').length;
+    if (totalItems <= 1) {
+      alert('プロットは最低一つ必要です。');
+      return; // 削除中止
+    }
+
+    const id = item.data('id');
 
     $.ajax({
-      url:    `/api/plot_orders/${id}`,
+      url: `/api/plot_orders/${id}`,
       method: 'DELETE',
       success: () => {
         item.remove();
@@ -165,6 +173,7 @@
       error: xhr => console.error('削除失敗:', xhr.responseText)
     });
   });
+
 
   // ==== 明示保存ボタン ====
   $('#saveBtnTop, #saveBtnBottom').click(syncAll);
