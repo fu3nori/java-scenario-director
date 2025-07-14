@@ -54,8 +54,9 @@
           <textarea class="form-control plot-content"
                     rows="2"
                     th:text="${order.content}"></textarea>
-        <button type="button" class="btn btn-primary add-btn">追加</button>
-        <button type="button" class="btn btn-danger delete-btn">削除</button>
+        <button type="button" class="btn btn-primary add-btn me-2 mt-3 mb-1">追加</button>
+        <button type="button" class="btn btn-danger delete-btn mt-3 mb-1">削除</button>
+
       </div>
     </div>
   </div>
@@ -139,8 +140,8 @@
               const html = ''
                       + `<div class="plot-item mb-3" data-id="${newItem.id}">`
                       +   `<textarea class="form-control plot-content" rows="2" style="width:70%;">${newItem.content}</textarea>`
-                      +   `<button type="button" class="btn btn-primary add-btn">追加</button>`
-                      +   `<button type="button" class="btn btn-danger delete-btn">削除</button>`
+                      +   `<button type="button" class="btn btn-primary add-btn  me-2 mt-3 mb-1">追加</button>`
+                      +   `<button type="button" class="btn btn-danger delete-btn  mt-3 mb-1">削除</button>`
                       + `</div>`;
               cur.after(html);
               syncAll();
